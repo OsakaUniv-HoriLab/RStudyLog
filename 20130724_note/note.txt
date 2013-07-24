@@ -1,0 +1,19 @@
+1.
+merosu.txtをUTF-8 BOM無しに変換した
+
+2.
+以下のRスクリプトを実行した
+
+library("RMeCab")
+setwd("作業ディレクトリ")
+res <- docDF("merosu.txt", type=1)
+write.table(res, file="test.csv", sep=",", row.names=FALSE)
+
+3.
+test.csvにCSVとしてデータが保存された
+
+
+
+その他
+GitHub の OsakaUniv-HoriLab/RStudyLog の Settings から Collaborator として Susisu を登録しました。
+こうすることで各ユーザーが直接commit等ができるようになります。
