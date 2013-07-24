@@ -1,0 +1,10 @@
+library("RMeCab")
+setwd("C:/Users/yokoi/Documents/Test")
+res <- RMeCabText("test3.txt")
+test <- c()
+for(i in 1:length(res))
+{
+  test <- rbind(test, unlist(res[i]))
+}
+
+write.table(test, file="test3out_r.txt", sep="\t", quote=FALSE, row.names=FALSE)
