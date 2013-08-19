@@ -1,0 +1,75 @@
+2013/08/19
+----------------------------------------
+sqlQueryを使用してテーブルの作成、データの挿入・更新が可能なことを確認
+----------------------------------------
+
+library(RODBC)
+con <- odbcConnect("connMySQL", "rmysqluser", "rmysqladmin")
+
+#新規テーブルを作成
+sqlQuery(con, "create table Fruits2 (Name varchar(100), price integer)")
+
+#データを挿入
+sqlQuery(con, "insert into Fruits2 values ('avocado', 128)")
+
+#データを更新
+sqlQuery(con, "update Fruits2 set price=98 where Name='avocado'")
+
+r.tbl <- sqlQuery(con, "select * from Fruits2")
+print(r.tbl)
+
+odbcClose(con)
+
+----------------------------------------
+RMeCabで解析したデータをSQLに入れる（未完成）
+----------------------------------------
+
+library(RMeCab)
+library(RODBC)
+
+makeTable <- function(data){
+  r <- c()
+  for(i in 1:length(data)){
+    r <- rbind(r, unlist(data[i]))
+  }
+  return(data.frame(I(r)))
+}
+
+export <- function(table, file){
+  write.table(table, file=file, sep="\t", quote=FALSE, row.names=FALSE)
+}
+
+sqlInsert <- function(con, into, table){
+  for(i in 1:nrow(table)){
+    query <- paste("insert into ", into, " values ('", paste(table[i,][1,], collapse="', '"), "')", sep="")
+    print(sqlQuery(con, query))	# エラー（文字コード関係と思われる）
+  }
+}
+
+setwd(<working directory>)
+res <- RMeCabText("test3.txt")
+tbl <- makeTable(res)
+
+con <- odbcConnect("connMySQL", "rmysqluser", "rmysqladmin")
+
+# テーブル作成
+# createTableQuery <- sprintf("create table MeCabTest (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+#                             "v1 char(100)",
+#                             "v2 char(100)",
+#                             "v3 char(100)",
+#                             "v4 char(100)",
+#                             "v5 char(100)",
+#                             "v6 char(100)",
+#                             "v7 char(100)",
+#                             "v8 char(100)",
+#                             "v9 char(100)",
+#                             "v10 char(100)")
+# sqlQuery(con, createTableQuery)
+
+sqlInsert(con, "MeCabTest", tbl)
+
+# 確認
+tbl2 <- sqlQuery(con, "select * from MeCabTest")
+print(tbl2)
+
+odbcClose(con)
