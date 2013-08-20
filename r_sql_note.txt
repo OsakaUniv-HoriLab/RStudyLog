@@ -1,4 +1,4 @@
-2013/08/19
+8/19
 ----------------------------------------
 sqlQueryを使用してテーブルの作成、データの挿入・更新が可能なことを確認
 ----------------------------------------
@@ -20,56 +20,66 @@ print(r.tbl)
 
 odbcClose(con)
 
+8/20
 ----------------------------------------
-RMeCabで解析したデータをSQLに入れる（未完成）
+RMeCabで解析したデータをSQLに入れる
 ----------------------------------------
 
 library(RMeCab)
 library(RODBC)
 
+# RMeCabTextで生成したデータをデータフレームに変換する
 makeTable <- function(data){
   r <- c()
   for(i in 1:length(data)){
     r <- rbind(r, unlist(data[i]))
   }
-  return(data.frame(I(r)))
+  return(data.frame(r))
 }
 
+# データフレーム書き出し（デバッグ用）
 export <- function(table, file){
-  write.table(table, file=file, sep="\t", quote=FALSE, row.names=FALSE)
+  write.table(table, file=file, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
 }
 
-sqlInsert <- function(con, into, table){
-  for(i in 1:nrow(table)){
-    query <- paste("insert into ", into, " values ('", paste(table[i,][1,], collapse="', '"), "')", sep="")
-    print(sqlQuery(con, query))	# エラー（文字コード関係と思われる）
-  }
+# MySQLデータテーブルにデータを追加
+sqlInsertTable <- function(con, into, table){
+  sqlSave(con, table, into, append=TRUE, rownames=FALSE)
 }
 
-setwd(<working directory>)
+setwd(<Working Directory>)
 res <- RMeCabText("test3.txt")
 tbl <- makeTable(res)
+# export(tbl, "test4.txt")
 
 con <- odbcConnect("connMySQL", "rmysqluser", "rmysqladmin")
 
 # テーブル作成
 # createTableQuery <- sprintf("create table MeCabTest (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-#                             "v1 char(100)",
-#                             "v2 char(100)",
-#                             "v3 char(100)",
-#                             "v4 char(100)",
-#                             "v5 char(100)",
-#                             "v6 char(100)",
-#                             "v7 char(100)",
-#                             "v8 char(100)",
-#                             "v9 char(100)",
-#                             "v10 char(100)")
+#                             "x1 char(100)",
+#                             "x2 char(100)",
+#                             "x3 char(100)",
+#                             "x4 char(100)",
+#                             "x5 char(100)",
+#                             "x6 char(100)",
+#                             "x7 char(100)",
+#                             "x8 char(100)",
+#                             "x9 char(100)",
+#                             "x10 char(100)")
 # sqlQuery(con, createTableQuery)
 
-sqlInsert(con, "MeCabTest", tbl)
+# MySQL側の列名とデータフレームの列名が一致している必要がある
+#sqlInsertTable(con, "MeCabTest", tbl)
+# テスト用
+# sqlQuery(con, "delete from MeCabTest")
 
 # 確認
 tbl2 <- sqlQuery(con, "select * from MeCabTest")
-print(tbl2)
+tbl2
 
 odbcClose(con)
+
+----------------------------------------
+ファイルにCSVとして書き出し
+----------------------------------------
+select * from MeCabTest into outfile '<filepath>' fields terminated by ',' enclosed by '"';
