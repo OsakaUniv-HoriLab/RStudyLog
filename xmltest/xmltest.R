@@ -1,4 +1,5 @@
 # XML読み込み、データへのアクセスのテスト
+# 参考: http://cran.r-project.org/web/packages/XML/XML.pdf
 library(XML)
 
 setwd(<Working Directory>)
