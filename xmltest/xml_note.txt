@@ -1,0 +1,25 @@
+# XMLから長単位の語彙を取り出し、テーブル化
+
+library(XML)
+
+setwd(<Working Directory>)
+# データ読み込み、パース
+doc <- xmlParseDoc("OT01_00002.xml")
+root <- xmlRoot(doc)
+# XPathでLUWのみデータを取り出し
+list <- xpathApply(root, "//LUW")
+
+toVector <- function(x){
+  # エンコード回りで失敗
+  # text <- iconv(xmlValue(x), from="SHIFT_JIS", to="UTF-8", sub="*")
+  pos <- xmlGetAttr(x, "l_pos")
+  wType <- xmlGetAttr(x, "l_wType")
+  lForm <- xmlGetAttr(x, "l_lForm")
+  lemma <- xmlGetAttr(x, "l_lemma")
+  # return(c(text, pos, wType, lForm, lemma))
+  return(c(lemma, pos, wType, lForm))
+}
+y <- sapply(list, toVector)
+
+# テーブルとして書き出し
+write.table(t(y), "test6.txt", sep=",", quote=TRUE, row.names=FALSE, col.names=c("lemma", "pos", "wType", "lForm"))
